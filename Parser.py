@@ -81,7 +81,7 @@ class Parser:
     def current_token(self):
         """Returns the current token without advancing the position."""
         return self.tokens[self.position]
-
+#
     def next_token(self):
         """Advances to the next token and returns it."""
         self.position += 1
