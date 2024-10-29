@@ -34,8 +34,8 @@ class TokenType(enum.Enum):
 	EQ = 201
 	PLUS = 202
 	MINUS = 203
-	ASTERISK = 204
-	SLASH = 205
+	MULTIPLY = 204
+	DIVIDE = 205
 	EQEQ = 206
 	NOTEQ = 207
 	LT = 208
