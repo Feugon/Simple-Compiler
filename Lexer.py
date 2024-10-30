@@ -47,6 +47,10 @@ class Lexer:
             token = Token(self.curChar, TokenType.MULTIPLY)
         elif self.curChar == '/':
             token = Token(self.curChar, TokenType.DIVIDE)
+        elif self.curChar == '(':
+            token = Token(self.curChar, TokenType.LP)
+        elif self.curChar == ')':
+            token = Token(self.curChar, TokenType.RP)
         elif self.curChar == '\n':
             token = Token(self.curChar, TokenType.NEWLINE)
         elif self.curChar == '\0':

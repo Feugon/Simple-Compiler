@@ -42,3 +42,5 @@ class TokenType(enum.Enum):
 	LTEQ = 209
 	GT = 210
 	GTEQ = 211
+	LP = 212       # left parentheses
+	RP = 213	   # right parentheses

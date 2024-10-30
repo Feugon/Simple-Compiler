@@ -1,34 +1,36 @@
 from Token import *
 import sys
 
-"""TODO: assignment doesn't allow for expressions || FIX when the source code ends on a new line ||
- Handle ENDIF(REPEAT) token || Clean up self.match() uses, or remove it outright
 
-"""
 
 class Parser:
     def __init__(self, tokens):
         """Initialize the parser with a list of tokens provided by the lexer."""
         self.tokens = tokens
+        self.tokenLen = len(tokens)
         self.position = 0
         self.results = []
+        self.declaredVars = set()
 
     def parse(self):
         """Main parsing method. Iterates over tokens and builds the parse tree or structured results."""
-        while self.position < len(self.tokens):
+        while self.position < self.tokenLen:
             construct = self.parse_statement()
             if construct:
                 self.results.append(construct)
 
     def skip_newlines(self):
         """Advances the position to skip any newline tokens."""
-        while self.current_token().kind == TokenType.NEWLINE:
+        # not sure if out of bounds check is necessary here
+        while self.position < self.tokenLen and self.current_token().kind == TokenType.NEWLINE:
             self.advance()
 
 
     def parse_statement(self):
         """Parses a single statement based on tokens."""
         self.skip_newlines()
+        if self.position >= self.tokenLen:
+            return
         token = self.current_token()
         if token.kind == TokenType.IF:
             return self.parse_if_statement()
@@ -37,9 +39,9 @@ class Parser:
         elif token.kind == TokenType.SET:
             return self.parse_assignment()
         elif token.kind == TokenType.ENDIF:
-            return
+            return token.kind
         elif token.kind == TokenType.ENDREPEAT:
-            return
+            return token.kind
         elif token.kind == TokenType.PRINT:
             return self.parse_print()
         else:
@@ -62,6 +64,7 @@ class Parser:
         left = self.current_token()
         operator = self.next_token()
         right = self.next_token()
+        #TODO: check for valid comparisons (same types, declared variables, appropriate operators...)
         return {'left': left.text, 'operator': operator.text, 'right': right.text}
 
     def parse_block(self):
@@ -80,11 +83,12 @@ class Parser:
             operator = self.current_token()
         if self.match(self.next_token(), TokenType.STRING):
             value = self.current_token()
-        elif self.match(self.current_token(), TokenType.NUMBER):
-            value = self.parse_expression()                            #This is not working as intended
+        elif self.match(self.current_token(), TokenType.NUMBER) or self.match(self.current_token(), TokenType.LP):
+            value = self.parse_expression()
         if not value:
             self.error("No value found in assignment.")
         self.advance()
+        self.declaredVars.add(var_name.text)
         return {'type': 'SET', 'operator': operator, 'value': value}
 
     def parse_expression(self):
@@ -121,10 +125,10 @@ class Parser:
             self.advance()  # Move past the number
             return int(token.text)
 
-        elif token.kind == TokenType.LEFT_PAREN:
+        elif token.kind == TokenType.LP:
             self.advance()  # Move past "("
             expression = self.parse_expression()
-            if self.current_token().kind != TokenType.RIGHT_PAREN:
+            if self.current_token().kind != TokenType.RP:
                 self.error("Expected ')'")
             self.advance()  # Move past ")"
             return expression
@@ -139,6 +143,11 @@ class Parser:
             # Handle direct string printing
             self.advance()
             return {'type': 'PRINT', 'value': self.current_token()}
+        elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text in self.declaredVars:
+            self.advance()
+            return {'type': 'PRINT', 'expression': self.current_token()}
+        elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text not in self.declaredVars:
+            self.error("Trying to access an undeclared variable.")
         else:
             # Handle variable or expression printing
             expression = self.parse_expression()
@@ -151,7 +160,7 @@ class Parser:
     def next_token(self):
         """Advances to the next token and returns it."""
         self.position += 1
-        if self.position >= len(self.tokens):
+        if self.position >= self.tokenLen:
             self.error("Expected additional tokens")
 
         return self.tokens[self.position]
