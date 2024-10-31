@@ -1,7 +1,7 @@
 from Lexer import *
 from Parser import *
 
-source = "IF BOOP == 123 DO \n \n SET x = (123 + 4) \n PRINT x \n ENDIF \n \n "
+source = "IF 24 * 7 == 123 + 5 DO \n \n SET x = (123 + 4) \n PRINT 234 * 5 \n ENDIF \n \n "
 lexer = Lexer(source)
 
 tokenList = []

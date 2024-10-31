@@ -1,7 +1,7 @@
 from Token import *
 import sys
 
-
+# TODO: handle endif token, change the assignment parsing so it includes the name of the variable
 
 class Parser:
     def __init__(self, tokens):
@@ -61,11 +61,23 @@ class Parser:
 
     def parse_condition(self):
         """Parses an expression, such as a comparison or arithmetic operation."""
-        left = self.current_token()
-        operator = self.next_token()
-        right = self.next_token()
-        #TODO: check for valid comparisons (same types, declared variables, appropriate operators...)
-        return {'left': left.text, 'operator': operator.text, 'right': right.text}
+        if self.current_token().kind == TokenType.IDENT:
+            left = self.current_token().text
+            self.advance()
+        else:
+            left = self.parse_expression()
+
+        operator = self.current_token()
+        self.advance()
+
+        if self.current_token().kind == TokenType.IDENT:
+            right = self.current_token().text
+            self.advance()
+        else:
+            right = self.parse_expression()
+        if operator.kind.value < 206:
+            self.error("Incorrect operator")
+        return {'left': left, 'operator': operator.text, 'right': right}
 
     def parse_block(self):
         """Parses a block of statements (e.g., statements inside an if-statement or loop)."""
@@ -82,14 +94,14 @@ class Parser:
         if self.match(self.next_token(), TokenType.EQ, True):
             operator = self.current_token()
         if self.match(self.next_token(), TokenType.STRING):
-            value = self.current_token()
+            value = self.current_token().text
         elif self.match(self.current_token(), TokenType.NUMBER) or self.match(self.current_token(), TokenType.LP):
             value = self.parse_expression()
         if not value:
             self.error("No value found in assignment.")
         self.advance()
         self.declaredVars.add(var_name.text)
-        return {'type': 'SET', 'operator': operator, 'value': value}
+        return {'type': 'SET', 'operator': operator.text, 'value': value}
 
     def parse_expression(self):
         """Parses an expression with addition and subtraction, consisting of terms."""
@@ -97,10 +109,10 @@ class Parser:
 
         # Parse additional terms with "+" or "-"
         while self.current_token().kind in (TokenType.PLUS, TokenType.MINUS):
-            operator = self.current_token()
+            operator = self.current_token().text  # Use operator text instead of the token object
             self.advance()  # Move past the operator
             right = self.parse_term()
-            left = {'operator': operator.text, 'left': left, 'right': right}
+            left = {'operator': operator, 'left': left, 'right': right}
 
         return left
 
@@ -110,7 +122,7 @@ class Parser:
 
         # Parse additional factors with "*" or "/"
         while self.current_token().kind in (TokenType.MULTIPLY, TokenType.DIVIDE):
-            operator = self.current_token()
+            operator = self.current_token().text  # Use operator text instead of the token object
             self.advance()  # Move past the operator
             right = self.parse_factor()
             left = {'operator': operator, 'left': left, 'right': right}
@@ -123,7 +135,7 @@ class Parser:
 
         if token.kind == TokenType.NUMBER:
             self.advance()  # Move past the number
-            return int(token.text)
+            return int(token.text)  # Return the number as an integer
 
         elif token.kind == TokenType.LP:
             self.advance()  # Move past "("
@@ -133,23 +145,23 @@ class Parser:
             self.advance()  # Move past ")"
             return expression
         else:
-            self.error("Expected a number or '(' in factor.")
+            self.error("Expected a number or '(' in factor instead of " + str(token.kind))
 
 
     def parse_print(self):
         """Parses a print statement, assuming the syntax 'PRINT <expression>'."""
         self.advance() # jump over PRINT
+        token = self.current_token()
         if self.match(self.current_token(),TokenType.STRING):
             # Handle direct string printing
             self.advance()
-            return {'type': 'PRINT', 'value': self.current_token()}
+            return {'type': 'PRINT', 'value': token.text}
         elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text in self.declaredVars:
             self.advance()
-            return {'type': 'PRINT', 'expression': self.current_token()}
+            return {'type': 'PRINT', 'identifier': token.text}
         elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text not in self.declaredVars:
             self.error("Trying to access an undeclared variable.")
         else:
-            # Handle variable or expression printing
             expression = self.parse_expression()
             return {'type': 'PRINT', 'expression': expression}
 
