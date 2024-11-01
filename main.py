@@ -1,7 +1,7 @@
 from Lexer import *
 from Parser import *
 
-source = "SET x = 10 \n SET y = 20 \n SET z = x + y"
+source = "SET x = 10 + 6 * 20 - (10+5) \nPRINT x + 10\nIF x == 10 DO \nPRINT x\nENDIF"
 lexer = Lexer(source)
 
 tokenList = []
@@ -14,4 +14,7 @@ while token.kind != TokenType.EOF:
 print("\n" + source)
 parser = Parser(tokenList)
 parser.parse()
-print(parser.get_results())
+
+
+for statement in parser.get_results():
+    print(statement)

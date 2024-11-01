@@ -5,9 +5,6 @@ class Token:
 		self.text = text
 		self.kind = kind
 
-	def setKind(self,kind):
-		self.kind = kind
-
 	@staticmethod
 	def checkIfKeyword(tokenText):
 		for kind in TokenType:
@@ -21,8 +18,6 @@ class TokenType(enum.Enum):
 	NUMBER = 1
 	IDENT = 2
 	STRING = 3
-	NUM_IDENT = 4
-	STR_IDENT = 5
 	# Keywords.
 	SET = 101
 	GOTO = 102

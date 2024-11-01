@@ -2,7 +2,6 @@ from Token import *
 import sys
 
 #TODO: Add assignment to an existin var e.g. SET x = 10 ... x = x + 5
-# TODO: Create different ident types and then see if you can do math with them
 
 class Parser:
     def __init__(self, tokens):
@@ -101,11 +100,8 @@ class Parser:
         if self.match(tokenOfValue, TokenType.STRING):
             value = tokenOfValue.text
         elif self.match(tokenOfValue, TokenType.NUMBER) or self.match(tokenOfValue, TokenType.LP):
-            var.setKind(TokenType.NUM_IDENT)
-            print(var.kind)
             value = self.parse_expression()
-        elif self.match(tokenOfValue, TokenType.NUM_IDENT) and tokenOfValue in self.declaredVars:
-            var.setKind(TokenType.NUM_IDENT)
+        elif self.match(tokenOfValue, TokenType.IDENT) and tokenOfValue.text in self.declaredVars:
             value = self.parse_expression()
         if not value:
             self.error("No value found in assignment.")
@@ -143,14 +139,14 @@ class Parser:
         """Parses a factor, which can be a number or a parenthesized expression."""
         token = self.current_token()
 
-        if token.kind == TokenType.NUMBER or token.kind == TokenType.NUM_IDENT:
+        if token.kind == TokenType.NUMBER or (token.kind == TokenType.IDENT and token.text in self.declaredVars):
             self.advance()  # Move past the number
-            return int(token.text)  # Return the number as an integer
+            return token.text  # Return the number as an integer
 
         elif token.kind == TokenType.LP:
             self.advance()  # Move past "("
             expression = self.parse_expression()
-            if self.current_token().kind != TokenType.RP:
+            if self.position >= self.tokenLen or self.current_token().kind != TokenType.RP:
                 self.error("Expected ')'")
             self.advance()  # Move past ")"
             return expression
@@ -167,8 +163,8 @@ class Parser:
             self.advance()
             return {'type': 'PRINT', 'value': token.text}
         elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text in self.declaredVars:
-            self.advance()
-            return {'type': 'PRINT', 'identifier': token.text}
+            expression = self.parse_expression()
+            return {'type': 'PRINT', 'identifier/expression': expression}
         elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text not in self.declaredVars:
             self.error("Trying to access an undeclared variable.")
         else:
