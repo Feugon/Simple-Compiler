@@ -125,6 +125,7 @@ class Lexer:
 
             # Check if the token is in the list of keywords.
             tokText = self.source[startPos: self.curPos + 1]  # Get the substring.
+
             keyword = Token.checkIfKeyword(tokText)
             if keyword == None:  # Identifier
                 token = Token(tokText, TokenType.IDENT)

@@ -1,7 +1,7 @@
 from Lexer import *
 from Parser import *
 
-source = "IF 24 * 7 == 123 + 5 DO \n \n SET x = (123 + 4) \n PRINT 234 * 5 \n ENDIF \n \n "
+source = "SET x = 10 \n SET y = 20 \n SET z = x + y"
 lexer = Lexer(source)
 
 tokenList = []
@@ -9,10 +9,9 @@ tokenList = []
 token = lexer.getToken()
 while token.kind != TokenType.EOF:
     tokenList.append(token)
-    print(token.kind)
     token = lexer.getToken()
 
-print("")
+print("\n" + source)
 parser = Parser(tokenList)
 parser.parse()
 print(parser.get_results())

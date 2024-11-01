@@ -1,7 +1,8 @@
 from Token import *
 import sys
 
-# TODO: handle endif token, change the assignment parsing so it includes the name of the variable
+#TODO: Add assignment to an existin var e.g. SET x = 10 ... x = x + 5
+# TODO: Create different ident types and then see if you can do math with them
 
 class Parser:
     def __init__(self, tokens):
@@ -89,26 +90,35 @@ class Parser:
 
 
     def parse_assignment(self):
-        var_name = self.next_token()
+        """ Parses an assignment statement """
+        var = self.next_token()
         value = None
         if self.match(self.next_token(), TokenType.EQ, True):
             operator = self.current_token()
-        if self.match(self.next_token(), TokenType.STRING):
-            value = self.current_token().text
-        elif self.match(self.current_token(), TokenType.NUMBER) or self.match(self.current_token(), TokenType.LP):
+
+        self.advance()
+        tokenOfValue = self.current_token()
+        if self.match(tokenOfValue, TokenType.STRING):
+            value = tokenOfValue.text
+        elif self.match(tokenOfValue, TokenType.NUMBER) or self.match(tokenOfValue, TokenType.LP):
+            var.setKind(TokenType.NUM_IDENT)
+            print(var.kind)
+            value = self.parse_expression()
+        elif self.match(tokenOfValue, TokenType.NUM_IDENT) and tokenOfValue in self.declaredVars:
+            var.setKind(TokenType.NUM_IDENT)
             value = self.parse_expression()
         if not value:
             self.error("No value found in assignment.")
         self.advance()
-        self.declaredVars.add(var_name.text)
-        return {'type': 'SET', 'operator': operator.text, 'value': value}
+        self.declaredVars.add(var.text)
+        return {'type': 'SET', 'variable': var.text, 'operator': operator.text, 'value': value}
 
     def parse_expression(self):
         """Parses an expression with addition and subtraction, consisting of terms."""
         left = self.parse_term()
 
         # Parse additional terms with "+" or "-"
-        while self.current_token().kind in (TokenType.PLUS, TokenType.MINUS):
+        while self.position < self.tokenLen and self.current_token().kind in (TokenType.PLUS, TokenType.MINUS):
             operator = self.current_token().text  # Use operator text instead of the token object
             self.advance()  # Move past the operator
             right = self.parse_term()
@@ -121,7 +131,7 @@ class Parser:
         left = self.parse_factor()
 
         # Parse additional factors with "*" or "/"
-        while self.current_token().kind in (TokenType.MULTIPLY, TokenType.DIVIDE):
+        while self.position < self.tokenLen and self.current_token().kind in (TokenType.MULTIPLY, TokenType.DIVIDE):
             operator = self.current_token().text  # Use operator text instead of the token object
             self.advance()  # Move past the operator
             right = self.parse_factor()
@@ -133,7 +143,7 @@ class Parser:
         """Parses a factor, which can be a number or a parenthesized expression."""
         token = self.current_token()
 
-        if token.kind == TokenType.NUMBER:
+        if token.kind == TokenType.NUMBER or token.kind == TokenType.NUM_IDENT:
             self.advance()  # Move past the number
             return int(token.text)  # Return the number as an integer
 
@@ -167,6 +177,8 @@ class Parser:
 
     def current_token(self):
         """Returns the current token without advancing the position."""
+        if self.position >= self.tokenLen:
+            self.error("Trying to get out of bounds token")
         return self.tokens[self.position]
 #
     def next_token(self):
@@ -186,13 +198,15 @@ class Parser:
         return self.results
 
     def match(self,token, type, strict = False):
+        """ Checks if a token is a certain kind, if strict match it sends an error if the token doesn't match."""
         if token.kind == type:
             return True
         elif strict:
-            self.error("Expected " + type + " but recieved " + token.kind)
+            self.error("Expected " + str(type) + " but recieved " + str(token.kind))
 
     def error(self,message):
-        sys.exit("Error: " + message)
+        """Exits the code and sends an error message."""
+        sys.exit("Parser Error: " + message)
 
 
 
