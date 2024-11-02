@@ -1,7 +1,8 @@
 from Lexer import *
 from Parser import *
+from Emitter import *
 
-source = "SET x = 10 + 6 * 20 - (10+5) \nPRINT x + 10\nIF x == 10 DO \nPRINT x\nENDIF"
+source = "PRINT 10\nPRINT \"Hi\"\nSET x = 10\nPRINT x "
 lexer = Lexer(source)
 
 tokenList = []
@@ -18,3 +19,18 @@ parser.parse()
 
 for statement in parser.get_results():
     print(statement)
+
+
+emitter = Emitter(parser.get_results())
+emitter.emit_tree()
+print(emitter.return_code())
+
+
+"""
+List of things that should be implemented/fixed:
+------------------------------------------------
+parentheses handling in emitter
+assignment to existing variables
+currently no way to tell if we are printing a variable or a string with var name
+
+"""
