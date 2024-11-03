@@ -2,7 +2,7 @@ from Lexer import *
 from Parser import *
 from Emitter import *
 
-source = "PRINT 10\nPRINT \"Hi\"\nSET x = 10\nPRINT x "
+source = "SET x = 10\n IF 10 == 10 DO\nPRINT x\nSET Y = 100\nENDIF"
 lexer = Lexer(source)
 
 tokenList = []

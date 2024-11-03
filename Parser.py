@@ -96,7 +96,7 @@ class Parser:
         self.advance()
         tokenOfValue = self.current_token()
         if self.match(tokenOfValue, TokenType.STRING):
-            value = tokenOfValue.text
+            value = '"tokenOfValue.text"'
         elif self.match(tokenOfValue, TokenType.NUMBER) or self.match(tokenOfValue, TokenType.LP):
             value = self.parse_expression()
         elif self.match(tokenOfValue, TokenType.IDENT) and tokenOfValue.text in self.declaredVars:
@@ -159,7 +159,7 @@ class Parser:
         if self.match(self.current_token(),TokenType.STRING):
             # Handle direct string printing
             self.advance()
-            return {"type": "PRINT", "value": token.text}
+            return {"type": "PRINT", "value": f'"{token.text}"'}
         elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text in self.declaredVars:
             expression = self.parse_expression()
             return {"type": "PRINT", "identifier/expression": expression}
