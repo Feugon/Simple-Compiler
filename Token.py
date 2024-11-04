@@ -44,3 +44,7 @@ class TokenType(enum.Enum):
 	GTEQ = 211
 	LP = 212       # left parentheses
 	RP = 213	   # right parentheses
+	INC = 214	   # ++
+	DEC = 215	   # --
+	PLUSEQ = 216
+	MINUSEQ = 217

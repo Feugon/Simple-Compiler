@@ -40,9 +40,27 @@ class Lexer:
         token = None
 
         if self.curChar == '+':
-            token = Token(self.curChar, TokenType.PLUS)
+            if self.peek() == '=':
+                lastChar = self.curChar
+                self.nextChar()
+                token = Token(lastChar + self.curChar, TokenType.PLUSEQ)
+            elif self.peek() == '+':
+                lastChar = self.curChar
+                self.nextChar()
+                token = Token(lastChar + self.curChar, TokenType.INC)
+            else:
+                token = Token(self.curChar, TokenType.PLUS)
         elif self.curChar == '-':
-            token = Token(self.curChar, TokenType.MINUS)
+            if self.peek() == '=':
+                lastChar = self.curChar
+                self.nextChar()
+                token = Token(lastChar + self.curChar, TokenType.MINUSEQ)
+            elif self.peek() == '-':
+                lastChar = self.curChar
+                self.nextChar()
+                token = Token(lastChar + self.curChar, TokenType.DEC)
+            else:
+                token = Token(self.curChar, TokenType.MINUS)
         elif self.curChar == '*':
             token = Token(self.curChar, TokenType.MULTIPLY)
         elif self.curChar == '/':

@@ -42,6 +42,8 @@ class Parser:
             return token.kind
         elif token.kind == TokenType.PRINT:
             return self.parse_print()
+        elif token.kind == TokenType.IDENT:
+            return self.parse_var_change()
         else:
             self.advance()
             return token.kind
@@ -85,6 +87,38 @@ class Parser:
         self.advance()
         return block
 
+    def parse_var_change(self):
+        """Parse a variable change, such as increment/decrement or setting equal to another value."""
+        var = self.current_token()
+
+        if var.text not in self.declaredVars:
+            self.error("Using an undeclared variable")
+
+
+        value = None
+        expectedTokens = [TokenType.EQ,TokenType.PLUSEQ, TokenType.MINUSEQ, TokenType.INC,TokenType.DEC]
+        if self.match(self.next_token(), expectedTokens, True):
+            operator = self.current_token()
+
+        if self.match(operator, [TokenType.INC,TokenType.DEC]):
+            self.advance()
+            return {"type": "VAR CHANGE", "variable": var.text, "operator": operator.text}
+
+        self.advance()
+        tokenOfValue = self.current_token()
+
+        if self.match(tokenOfValue, TokenType.STRING):
+            value = f'"{tokenOfValue.text}"'
+        elif self.match(tokenOfValue, TokenType.NUMBER) or self.match(tokenOfValue, TokenType.LP):
+            value = self.parse_expression()
+        elif self.match(tokenOfValue, TokenType.IDENT) and tokenOfValue.text in self.declaredVars:
+            value = self.parse_expression()
+        if not value:
+            self.error("No value found in assignment.")
+        self.advance()
+        self.declaredVars.add(var.text)
+        return {"type": "VAR CHANGE", "variable": var.text, "operator": operator.text, "value": value}
+
 
     def parse_assignment(self):
         """ Parses an assignment statement """
@@ -96,7 +130,7 @@ class Parser:
         self.advance()
         tokenOfValue = self.current_token()
         if self.match(tokenOfValue, TokenType.STRING):
-            value = '"tokenOfValue.text"'
+            value = f'"{tokenOfValue.text}"'
         elif self.match(tokenOfValue, TokenType.NUMBER) or self.match(tokenOfValue, TokenType.LP):
             value = self.parse_expression()
         elif self.match(tokenOfValue, TokenType.IDENT) and tokenOfValue.text in self.declaredVars:
@@ -193,10 +227,15 @@ class Parser:
 
     def match(self,token, type, strict = False):
         """ Checks if a token is a certain kind, if strict match it sends an error if the token doesn"t match."""
+        if isinstance(type,list):
+            if token.kind in type:
+                return True
+            if strict:
+                self.error("Expected " + str(type) + " but received " + str(token.kind))
         if token.kind == type:
             return True
         elif strict:
-            self.error("Expected " + str(type) + " but recieved " + str(token.kind))
+            self.error("Expected " + str(type) + " but received " + str(token.kind))
 
     def error(self,message):
         """Exits the code and sends an error message."""

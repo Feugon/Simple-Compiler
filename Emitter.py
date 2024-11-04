@@ -15,7 +15,7 @@ class Emitter:
         self.outlineBot = "\n\treturn 0;\n}"
 
     def emit_statement(self,statement):
-        """ Iter through every statement in parse tree and emit the necessary code"""
+        """Emits statement based on their types"""
         if statement["type"] == "SET":
             compiledCode = self.emit_SET(statement)
             return compiledCode
@@ -25,11 +25,14 @@ class Emitter:
         elif statement["type"] == "IF":
             compiledCode = self.emit_IF(statement)
             return compiledCode
+        elif statement["type"] == "VAR CHANGE":
+            compiledCode = self.emit_var_change(statement)
+            return compiledCode
         else:
             self.error("Unsupported Statement Type")
 
-
     def emit_tree(self):
+        """Emits the entire parse tree"""
         for statement in self.parseTree:
             compiledCode = self.emit_statement(statement)
             self.emit(compiledCode)
@@ -79,13 +82,30 @@ class Emitter:
 
         return output
 
+    def emit_var_change(self,statement):
+        """Emits variable change / reassignment"""
+        var = statement["variable"]
+        operator = statement["operator"]
+        if var not in self.symbolsTable:
+            self.error("Trying to change an undeclared variable")
+
+        if "value" in statement:
+            value = self.emit_value(statement["value"])
+            return f"{var} {operator} {value};"
+        elif operator == "++" or operator == "--":
+            return f"{var}{operator};"
+        else:
+            self.error("Expected a value when changing variable value")
+
 
     def emit_value(self, value):
+        """Emits the value element: expressions,nums,strings and such """
         if isinstance(value,str):
             return value
 
         elif isinstance(value,dict):
             operator = value["operator"]
+            # recursively obtain the value of expressions nested in other expressions
             left = self.emit_value(value["left"])
             right = self.emit_value(value["right"])
 
