@@ -1,0 +1,3 @@
+SET x = 10 * 3
+SET y = 20 - 3
+SET z = x / y

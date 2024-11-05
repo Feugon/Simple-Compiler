@@ -9,7 +9,7 @@ class Emitter:
         self.parseTree = parseTree
         self.code = ""
         self.symbolsTable = {}
-
+        self.indents = 1
         # this represents libraries and int main etc. that we need to run a c++ program
         self.outlineTop = "#include <iostream>\n#include <string>\n \nint main()\n{\n"
         self.outlineBot = "\n\treturn 0;\n}"
@@ -43,7 +43,7 @@ class Emitter:
         var_name = statement["variable"]
         var_type = ""
 
-        if value[0].isdigit():
+        if value[0].isdigit() or value[0] == "(":
             # easier to use float for all numerical vars than identifying them
             var_type = "float"
         elif value[0] == "\"":
@@ -72,27 +72,36 @@ class Emitter:
         condition = self.emit_value(statement["condition"])
         output = f"if ({condition}) {{"
 
+        self.indents += 1
         for line in statement["body"]:
-            print(line)
             if isinstance(line, TokenType):  # this checks for ENDIF token (a tad hacky)
                 break
-            output += "\n\t\t" + self.emit_statement(line)
+            output += "\n" + ("\t" * self.indents) + self.emit_statement(line)
 
-        output += "\n\t}"
+        output += "\n" + "\t" * (self.indents - 1) + "}"
+        self.indents -= 1
 
         return output
 
     def emit_var_change(self,statement):
         """Emits variable change / reassignment"""
         var = statement["variable"]
-        operator = statement["operator"]
+
         if var not in self.symbolsTable:
             self.error("Trying to change an undeclared variable")
 
+        varIsString = self.symbolsTable[var] == "std::string"
+        operator = statement["operator"]
+
         if "value" in statement:
             value = self.emit_value(statement["value"])
+
+            if varIsString and value[0] != "\"":
+                self.error("String variable can not do operation with non-string values")
             return f"{var} {operator} {value};"
         elif operator == "++" or operator == "--":
+            if varIsString:
+                self.error("Using increment/decrement operator on a string")
             return f"{var}{operator};"
         else:
             self.error("Expected a value when changing variable value")
@@ -117,12 +126,12 @@ class Emitter:
                     self.error("Need two numerical values for an expression")
             """
 
-            return f"{left} {operator} {right}"
+            return f"({left} {operator} {right})"
 
 
     def emit(self, statement):
         """ Appends a statement to the code"""
-        self.code += "\t" + statement + "\n"
+        self.code += ("\t" * self.indents) + statement + "\n"
 
     def return_code(self):
         """ Returns the C++ code as a string"""

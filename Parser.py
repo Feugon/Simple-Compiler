@@ -70,12 +70,12 @@ class Parser:
         operator = self.current_token()
         self.advance()
 
-        if self.current_token().kind == TokenType.IDENT:
-            right = self.current_token().text
+        if self.current_token().kind == TokenType.IDENT or self.current_token().kind == TokenType.STRING:
+            right = f'"{self.current_token().text}"'
             self.advance()
         else:
             right = self.parse_expression()
-        if operator.kind.value < 206:
+        if operator.kind.value < 206 and operator.kind.value > 211 :
             self.error("Incorrect operator")
         return {"left": left, "operator": operator.text, "right": right}
 
@@ -172,9 +172,8 @@ class Parser:
         token = self.current_token()
 
         if token.kind == TokenType.NUMBER or (token.kind == TokenType.IDENT and token.text in self.declaredVars):
-            self.advance()  # Move past the number
-            return token.text  # Return the number as an integer
-
+            self.advance()
+            return token.text
         elif token.kind == TokenType.LP:
             self.advance()  # Move past "("
             expression = self.parse_expression()
