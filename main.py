@@ -19,6 +19,7 @@ while token.kind != TokenType.EOF:
     tokenList.append(token)
     token = lexer.getToken()
 
+
 print("\n" + source)
 parser = Parser(tokenList)
 parser.parse()

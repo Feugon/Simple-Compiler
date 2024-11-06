@@ -82,7 +82,9 @@ class Parser:
     def parse_block(self):
         """Parses a block of statements (e.g., statements inside an if-statement or loop)."""
         block = []
+
         while self.current_token().kind != TokenType.TIMES and self.current_token().kind != TokenType.ENDIF:
+            #print(self.current_token().text)
             block.append(self.parse_statement())
         self.advance()
         return block
@@ -206,8 +208,9 @@ class Parser:
         self.advance() # jump over PRINT
         token = self.current_token()
         if self.match(self.current_token(),TokenType.STRING):
-            # Handle direct string printing
             self.advance()
+            self.skip_newlines()
+            print(self.current_token().text)
             return {"type": "PRINT", "value": f'"{token.text}"'}
         elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text in self.declaredVars:
             expression = self.parse_expression()

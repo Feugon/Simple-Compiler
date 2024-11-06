@@ -4,6 +4,7 @@
 int main()
 {
 	for (int zebra = 0; zebra < 10; zebra++) {
+		std::cout << "HI" << std::endl;
 	}
 
 	return 0;
