@@ -43,10 +43,10 @@ with open('output.txt', 'w') as file:
 List of things that should be implemented/fixed:
 ------------------------------------------------
 code quality:
-
+add some way to interact with the variable in the for loops (so if we define var as i for the looping portion we should
+be able to use i the same way we use a regular variable, and then we should delete it)
 
 features:
--for loops
 -functions
 
 """

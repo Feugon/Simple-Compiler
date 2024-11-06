@@ -3,9 +3,8 @@
  
 int main()
 {
-	float x = (10 * 3);
-	float y = (20 - 3);
-	float z = (x / y);
+	for (int zebra = 0; zebra < 10; zebra++) {
+	}
 
 	return 0;
 }

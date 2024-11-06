@@ -33,12 +33,12 @@ class Parser:
         if token.kind == TokenType.IF:
             return self.parse_if_statement()
         elif token.kind == TokenType.REPEAT:
-            return self.parse_while_statement()
+            return self.parse_repeat()
         elif token.kind == TokenType.SET:
             return self.parse_assignment()
         elif token.kind == TokenType.ENDIF:
             return token.kind
-        elif token.kind == TokenType.ENDREPEAT:
+        elif token.kind == TokenType.VAR:
             return token.kind
         elif token.kind == TokenType.PRINT:
             return self.parse_print()
@@ -82,7 +82,7 @@ class Parser:
     def parse_block(self):
         """Parses a block of statements (e.g., statements inside an if-statement or loop)."""
         block = []
-        while self.current_token().kind != TokenType.ENDREPEAT and self.current_token().kind != TokenType.ENDIF:
+        while self.current_token().kind != TokenType.TIMES and self.current_token().kind != TokenType.ENDIF:
             block.append(self.parse_statement())
         self.advance()
         return block
@@ -140,6 +140,22 @@ class Parser:
         self.advance()
         self.declaredVars.add(var.text)
         return {"type": "SET", "variable": var.text, "operator": operator.text, "value": value}
+
+    def parse_repeat(self):
+        self.advance() # jump over repeat
+        self.skip_newlines()
+
+        body = self.parse_block()
+        times = self.parse_expression()
+        self.advance() # jump over var
+
+        var_name = self.current_token().text
+        self.advance()
+
+        if not isinstance(var_name,str):
+            self.error("VAR should be a string name for the variable")
+
+        return {"type": "REPEAT", "body": body, "times":times, "var":var_name}
 
     def parse_expression(self):
         """Parses an expression with addition and subtraction, consisting of terms."""

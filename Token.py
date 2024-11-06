@@ -29,7 +29,8 @@ class TokenType(enum.Enum):
 	ENDIF = 108
 	WHILE = 109
 	REPEAT = 110
-	ENDREPEAT = 111
+	TIMES = 111
+	VAR = 112
 	# Operators.
 	EQ = 201
 	PLUS = 202

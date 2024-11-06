@@ -28,6 +28,9 @@ class Emitter:
         elif statement["type"] == "VAR CHANGE":
             compiledCode = self.emit_var_change(statement)
             return compiledCode
+        elif statement["type"] == "REPEAT":
+            compiledCode = self.emit_repeat(statement)
+            return compiledCode
         else:
             self.error("Unsupported Statement Type")
 
@@ -83,6 +86,22 @@ class Emitter:
 
         return output
 
+    def emit_repeat(self,statement):
+
+        times = statement["times"]
+        var_name = statement["var"]
+        output = f"for (int {var_name} = 0; {var_name} < {times}; {var_name}++) {{"
+
+        self.indents += 1
+        for line in statement["body"]:
+            if isinstance(line, TokenType):  # this checks for TIMES token (a tad hacky)
+                break
+            output += "\n" + ("\t" * self.indents) + self.emit_statement(line)
+
+        self.indents -= 1
+
+        return output + "\n" + ("\t" * self.indents) + "}"
+
     def emit_var_change(self,statement):
         """Emits variable change / reassignment"""
         var = statement["variable"]
@@ -129,9 +148,9 @@ class Emitter:
             return f"({left} {operator} {right})"
 
 
-    def emit(self, statement):
+    def emit(self, code):
         """ Appends a statement to the code"""
-        self.code += ("\t" * self.indents) + statement + "\n"
+        self.code += ("\t" * self.indents) + code + "\n"
 
     def return_code(self):
         """ Returns the C++ code as a string"""
