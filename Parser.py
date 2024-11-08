@@ -38,7 +38,7 @@ class Parser:
             return self.parse_assignment()
         elif token.kind == TokenType.ENDIF:
             return token.kind
-        elif token.kind == TokenType.VAR:
+        elif token.kind == TokenType.TIMES:
             return token.kind
         elif token.kind == TokenType.PRINT:
             return self.parse_print()
@@ -84,7 +84,7 @@ class Parser:
         block = []
 
         while self.current_token().kind != TokenType.TIMES and self.current_token().kind != TokenType.ENDIF:
-            #print(self.current_token().text)
+            print(self.current_token().kind)
             block.append(self.parse_statement())
         self.advance()
         return block
@@ -147,12 +147,23 @@ class Parser:
         self.advance() # jump over repeat
         self.skip_newlines()
 
+        # this is a little gross, we find the index of the VAR keyword, we know the next one is the var name
+        # so we add it to the declared vars, parse body, then remove it. Should rework this...
+        tokens_text = [token.text for token in self.tokens[self.position:]]
+        var_index = tokens_text.index('VAR') + self.position
+        temp_var = self.tokens[var_index + 1]
+        self.declaredVars.add(temp_var.text)
+
         body = self.parse_block()
+
+        self.declaredVars.remove(temp_var.text)
+
         times = self.parse_expression()
         self.advance() # jump over var
 
         var_name = self.current_token().text
         self.advance()
+
 
         if not isinstance(var_name,str):
             self.error("VAR should be a string name for the variable")

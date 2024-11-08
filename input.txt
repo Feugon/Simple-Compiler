@@ -1,3 +1,7 @@
+SET x = 10 * 3
+
+IF x == 30 DO
 REPEAT
-PRINT "HI"
-TIMES 10 VAR "zebra"
+PRINT x
+TIMES 10 VAR i
+ENDIF

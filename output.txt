@@ -3,8 +3,11 @@
  
 int main()
 {
-	for (int zebra = 0; zebra < 10; zebra++) {
-		std::cout << "HI" << std::endl;
+	float x = (10 * 3);
+	if ((x == 30)) {
+		for (int i = 0; i < 10; i++) {
+			std::cout << x << std::endl;
+		}
 	}
 
 	return 0;

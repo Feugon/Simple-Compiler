@@ -90,6 +90,7 @@ class Emitter:
 
         times = statement["times"]
         var_name = statement["var"]
+        self.symbolsTable[var_name] = "float"
         output = f"for (int {var_name} = 0; {var_name} < {times}; {var_name}++) {{"
 
         self.indents += 1
@@ -97,8 +98,8 @@ class Emitter:
             if isinstance(line, TokenType):  # this checks for TIMES token (a tad hacky)
                 break
             output += "\n" + ("\t" * self.indents) + self.emit_statement(line)
-
         self.indents -= 1
+        del self.symbolsTable[var_name]
 
         return output + "\n" + ("\t" * self.indents) + "}"
 
