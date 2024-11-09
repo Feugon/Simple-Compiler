@@ -31,6 +31,9 @@ class TokenType(enum.Enum):
 	REPEAT = 110
 	TIMES = 111
 	VAR = 112
+	FUNCTION = 113
+	CALL = 114
+	ENDFUNCTION = 115
 	# Operators.
 	EQ = 201
 	PLUS = 202

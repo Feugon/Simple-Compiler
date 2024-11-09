@@ -45,6 +45,7 @@ List of things that should be implemented/fixed:
 ------------------------------------------------
 code quality:
 nested for-loops (everything breaks in them) 
+There is a bug with ENDFUNCTION token (should not be in the parse tree, but is)
 
 features:
 -functions

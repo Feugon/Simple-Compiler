@@ -9,6 +9,7 @@ class Parser:
         self.position = 0
         self.results = []
         self.declaredVars = set()
+        self.declaredFunction = set()
 
     def parse(self):
         """Main parsing method. Iterates over tokens and builds the parse tree or structured results."""
@@ -36,9 +37,11 @@ class Parser:
             return self.parse_repeat()
         elif token.kind == TokenType.SET:
             return self.parse_assignment()
-        elif token.kind == TokenType.ENDIF:
-            return token.kind
-        elif token.kind == TokenType.TIMES:
+        elif token.kind == TokenType.FUNCTION:
+            return self.parse_function()
+        elif token.kind == TokenType.CALL:
+            return self.parse_call()
+        elif token.kind == TokenType.TIMES or token.kind == TokenType.ENDFUNCTION or token.kind == TokenType.ENDIF:
             return token.kind
         elif token.kind == TokenType.PRINT:
             return self.parse_print()
@@ -82,9 +85,10 @@ class Parser:
     def parse_block(self):
         """Parses a block of statements (e.g., statements inside an if-statement or loop)."""
         block = []
-
-        while self.current_token().kind != TokenType.TIMES and self.current_token().kind != TokenType.ENDIF:
-            print(self.current_token().kind)
+        self.skip_newlines()
+        while (self.current_token().kind != TokenType.TIMES
+               and self.current_token().kind != TokenType.ENDIF
+               and self.current_token().kind != TokenType.ENDFUNCTION):
             block.append(self.parse_statement())
         self.advance()
         return block
@@ -120,6 +124,23 @@ class Parser:
         self.advance()
         self.declaredVars.add(var.text)
         return {"type": "VAR CHANGE", "variable": var.text, "operator": operator.text, "value": value}
+
+    def parse_function(self):
+        self.advance() # skip function keyword
+        func_name = self.current_token()
+        self.advance() # go past function name
+        body = self.parse_block()
+        self.declaredFunction.add(func_name.text)
+        return {"type": "FUNCTION", "name": func_name.text, "body": body}
+
+    def parse_call(self):
+        self.advance() # jump over CALL
+        func_name = self.current_token().text
+
+        if func_name not in self.declaredFunction:
+            self.error("Trying to call an undeclared function")
+
+        return {"type": "CALL", "function": func_name}
 
 
     def parse_assignment(self):

@@ -31,6 +31,10 @@ class Emitter:
         elif statement["type"] == "REPEAT":
             compiledCode = self.emit_repeat(statement)
             return compiledCode
+        elif statement["type"] == "FUNCTION":
+            print("hi")
+        elif statement["type"] == "CALL":
+            pass
         else:
             self.error("Unsupported Statement Type")
 
@@ -92,16 +96,31 @@ class Emitter:
         var_name = statement["var"]
         self.symbolsTable[var_name] = "float"
         output = f"for (int {var_name} = 0; {var_name} < {times}; {var_name}++) {{"
+        output += self.emit_body(statement)
 
-        self.indents += 1
-        for line in statement["body"]:
-            if isinstance(line, TokenType):  # this checks for TIMES token (a tad hacky)
-                break
-            output += "\n" + ("\t" * self.indents) + self.emit_statement(line)
-        self.indents -= 1
         del self.symbolsTable[var_name]
 
         return output + "\n" + ("\t" * self.indents) + "}"
+
+    def emit_function(self,statement):
+        func_name = statement["name"]
+
+        output = f"void {func_name}(){{ \n"
+        output += self.emit_body(statement)
+
+
+        return output + "\n" + ("\t" * self.indents) + "}"
+
+    def emit_body(self,statement):
+        output = []
+        self.indents += 1
+        for line in statement["body"]:
+            if isinstance(line, TokenType):  # this checks for end tokens (a tad hacky)
+                break
+            output += "\n" + ("\t" * self.indents) + self.emit_statement(line)
+        self.indents -= 1
+        return output
+
 
     def emit_var_change(self,statement):
         """Emits variable change / reassignment"""
