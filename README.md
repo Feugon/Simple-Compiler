@@ -43,8 +43,6 @@ This compiler is a custom compiler project that translates code written in a sim
 
 ## Language Grammar
 The language grammar for this project was defined as follows:
-Here is your grammar reformatted in a cleaner way for inclusion in your README, with some minor corrections to ensure consistency and clarity. I’ve also added some additional comments for readability:
-
 ---
 
 ### Grammar
@@ -52,14 +50,12 @@ Here is your grammar reformatted in a cleaner way for inclusion in your README, 
 This defines the syntax for the custom language used in this project, written in Backus-Naur Form (BNF).
 
 #### Program Structure
-A program consists of one or more statements.
 
 ```bnf
 <program>        ::= {<statement>}
 ```
 
 #### Statements
-A statement can be an assignment, if-statement, expression, print statement, or a repeat loop.
 
 ```bnf
 <statement>      ::= <assignment> nl
@@ -67,10 +63,10 @@ A statement can be an assignment, if-statement, expression, print statement, or 
                  | <expression> nl
                  | PRINT (<factor> | <str>) nl
                  | <repeat> nl
+                 | <function> nl
 ```
 
 #### Assignment
-An assignment statement assigns a value to a variable.
 
 ```bnf
 <assignment>     ::= <identifier> <var_name> "=" <expression> nl
@@ -82,7 +78,6 @@ An assignment statement assigns a value to a variable.
 ```
 
 #### If-Statement
-An if-statement includes a condition followed by one or more statements.
 
 ```bnf
 <if-statement>   ::= "IF" <condition> "DO" nl <statement>* "ENDIF" nl
@@ -92,7 +87,6 @@ An if-statement includes a condition followed by one or more statements.
 ```
 
 #### Expressions
-An expression can be a series of terms and factors.
 
 ```bnf
 <expression>     ::= <term> (("+" | "-") <term>)*
@@ -101,7 +95,6 @@ An expression can be a series of terms and factors.
 ```
 
 #### Strings
-A string is a sequence of characters enclosed in double quotes.
 
 ```bnf
 <str>            ::= "\"" <character>* "\""
@@ -109,15 +102,21 @@ A string is a sequence of characters enclosed in double quotes.
 ```
 
 #### Repeat Loop
-A repeat loop repeats a block of statements a specific number of times, with a variable to track the count.
 
 ```bnf
 <repeat>         ::= "REPEAT" <body> "TIMES" <num> "VAR" <str>
 <body>           ::= <statement> | <statement> <body>
 ```
 
+#### Functions
+
+```bnf
+<function>       ::= "FUNCTION" <function_name> <body> "ENDFUNCTION"
+<function_name>  ::= '"' <name> '"'
+<body>           ::= <statement> | <statement> <body>
+```
+
 #### Characters and Tokens
-Characters are defined as letters, digits, punctuation, or whitespace.
 
 ```bnf
 <letter>         ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
@@ -134,6 +133,6 @@ Characters are defined as letters, digits, punctuation, or whitespace.
 
 
 ## Acknoweledgments 
-This project was attempted largely in part because I saw a brief article by Austin Henley about creating his own minute compiler. The article was so interesting that I decided to tackle this project head on and try to implement my own design. Here is the link to the article: https://austinhenley.com/blog/teenytinycompiler1.html
+This project was attempted largely in part because I saw a brief article by Austin Henley about creating his own minute compiler. The article was so interesting that I decided to tackle this project head on and try to implement my own design. Here is the link to the article: https://austinhenley.com/blog/teenytinycompiler1.html. I employed the help of ChatGPT for writing the README and debugging some code.
 
 
