@@ -10,8 +10,8 @@ class Emitter:
         self.code = ""
         self.symbolsTable = {}
         self.indents = 1
-        # this represents libraries and int main etc. that we need to run a c++ program
-        self.outlineTop = "#include <iostream>\n#include <string>\n \nint main()\n{\n"
+        # this represents libraries  that we need to run a c++ program
+        self.outlineTop = "#include <iostream>\n#include <string>\n"
         self.outlineBot = "\n\treturn 0;\n}"
 
     def emit_statement(self,statement):
@@ -32,9 +32,12 @@ class Emitter:
             compiledCode = self.emit_repeat(statement)
             return compiledCode
         elif statement["type"] == "FUNCTION":
-            print("hi")
+            compiledCode = self.emit_function(statement)
+            self.outlineTop += compiledCode
+            return ""
         elif statement["type"] == "CALL":
-            pass
+            compiledCode = self.emit_call(statement)
+            return compiledCode
         else:
             self.error("Unsupported Statement Type")
 
@@ -96,7 +99,15 @@ class Emitter:
         var_name = statement["var"]
         self.symbolsTable[var_name] = "float"
         output = f"for (int {var_name} = 0; {var_name} < {times}; {var_name}++) {{"
-        output += self.emit_body(statement)
+        #output += self.emit_body(statement)
+        self.indents += 1
+        for line in statement["body"]:
+            if isinstance(line, TokenType):  # this checks for ENDIF token (a tad hacky)
+                break
+            output += "\n" + ("\t" * self.indents) + self.emit_statement(line)
+
+
+        self.indents -= 1
 
         del self.symbolsTable[var_name]
 
@@ -104,15 +115,17 @@ class Emitter:
 
     def emit_function(self,statement):
         func_name = statement["name"]
-
-        output = f"void {func_name}(){{ \n"
+        output = f"void {func_name}(){{"
         output += self.emit_body(statement)
-
-
         return output + "\n" + ("\t" * self.indents) + "}"
 
+    def emit_call(self,statement):
+        func_name = statement["function"]
+        return f"{func_name}();"
+
+
     def emit_body(self,statement):
-        output = []
+        output = ""
         self.indents += 1
         for line in statement["body"]:
             if isinstance(line, TokenType):  # this checks for end tokens (a tad hacky)
@@ -174,7 +187,7 @@ class Emitter:
 
     def return_code(self):
         """ Returns the C++ code as a string"""
-        return self.outlineTop + self.code + self.outlineBot
+        return self.outlineTop + "\nint main()\n{\n" + self.code + self.outlineBot
 
     def error(self, message):
         """Exits the code and sends an error message."""

@@ -131,12 +131,13 @@ class Parser:
         self.advance() # go past function name
         body = self.parse_block()
         self.declaredFunction.add(func_name.text)
+
         return {"type": "FUNCTION", "name": func_name.text, "body": body}
 
     def parse_call(self):
         self.advance() # jump over CALL
         func_name = self.current_token().text
-
+        self.advance() # jump over the function name
         if func_name not in self.declaredFunction:
             self.error("Trying to call an undeclared function")
 
@@ -241,7 +242,6 @@ class Parser:
         token = self.current_token()
         if self.match(self.current_token(),TokenType.STRING):
             self.advance()
-            self.skip_newlines()
             print(self.current_token().text)
             return {"type": "PRINT", "value": f'"{token.text}"'}
         elif self.match(self.current_token(), TokenType.IDENT) and self.current_token().text in self.declaredVars:

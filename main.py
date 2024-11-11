@@ -26,7 +26,7 @@ parser.parse()
 
 
 for statement in parser.get_results():
-    print(statement)
+    print(0,statement)
 
 
 emitter = Emitter(parser.get_results())

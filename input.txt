@@ -1,4 +1,17 @@
-FUNCTION "Hi"
-PRINT "Hello"
+FUNCTION "Fibb"
+SET a = 0
+SET b = 1
+
+SET nTerms = 10
+
+REPEAT
+PRINT a
+SET next = a + b
+a = b
+b = next
+TIMES nTerms VAR "i"
 ENDFUNCTION
+
+CALL "Fibb"
+
 
